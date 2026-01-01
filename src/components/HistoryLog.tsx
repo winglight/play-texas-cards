@@ -3,7 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import clsx from 'clsx';
 import { Play, Pause, SkipBack, SkipForward, Square } from 'lucide-react';
 
-export const HistoryLog: React.FC = () => {
+export const HistoryLog: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ className, style }) => {
   const { 
       currentHandHistory, 
       winners, 
@@ -49,7 +49,10 @@ export const HistoryLog: React.FC = () => {
   }
 
   return (
-    <div className="absolute top-[5%] right-[5%] w-64 h-64 bg-black bg-opacity-70 rounded-lg border border-gray-600 flex flex-col overflow-hidden z-20 shadow-xl pointer-events-auto">
+    <div 
+      className={clsx("flex flex-col overflow-hidden bg-black bg-opacity-70 rounded-lg border border-gray-600 pointer-events-auto", className)}
+      style={style}
+    >
       <div className="bg-gray-800 px-3 py-1 text-xs font-bold text-gray-300 border-b border-gray-600 flex justify-between items-center">
         <span>{isReplayMode ? 'REPLAY MODE' : 'HAND HISTORY'}</span>
         

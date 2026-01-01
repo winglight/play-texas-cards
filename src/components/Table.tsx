@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Player } from './Player';
 import { Card } from './Card';
@@ -7,18 +7,19 @@ import { HistoryLog } from './HistoryLog';
 import { SessionStats } from './SessionStats';
 import { SessionControls } from './SessionControls';
 import clsx from 'clsx';
+import { List, BarChart2, X } from 'lucide-react';
 
 // Pre-defined positions for 9 players
 // [top%, left%]
 const PLAYER_POSITIONS = [
   { bottom: '18%', left: '50%', transform: 'translateX(-50%)' }, // User (Bottom Center) - Moved down closer to controls
   { bottom: '25%', left: '5%', transform: 'translate(0, 0)' }, // Bottom Left
-  { top: '40%', left: '5%', transform: 'translate(0, -50%)' }, // Left
-  { top: '5%', left: '20%', transform: 'translate(-50%, 0)' }, // Top Left
-  { top: '5%', left: '40%', transform: 'translate(-50%, 0)' }, // Top Center Left
-  { top: '5%', left: '60%', transform: 'translate(-50%, 0)' }, // Top Center Right
-  { top: '15%', left: '80%', transform: 'translate(-50%, 0)' }, // Top Right
-  { top: '40%', right: '5%', transform: 'translate(0, -50%)' }, // Right
+  { top: '45%', left: '5%', transform: 'translate(0, -50%)' }, // Left
+  { top: '15%', left: '13%', transform: 'translate(-50%, 0)' }, // Top Left
+  { top: '15%', left: '38%', transform: 'translate(-50%, 0)' }, // Top Center Left
+  { top: '15%', left: '62%', transform: 'translate(-50%, 0)' }, // Top Center Right
+  { top: '18%', left: '87%', transform: 'translate(-50%, 0)' }, // Top Right
+  { top: '45%', right: '5%', transform: 'translate(0, -50%)' }, // Right
   { bottom: '25%', right: '10%', transform: 'translate(50%, 0)' }, // Bottom Right
 ];
 
@@ -38,6 +39,9 @@ export const Table: React.FC = () => {
     stage
   } = useGameStore();
 
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [infoTab, setInfoTab] = useState<'history' | 'stats'>('history');
+
   const userIndex = 0; // Assuming user is always index 0 for now
   const user = players[userIndex];
   
@@ -49,6 +53,45 @@ export const Table: React.FC = () => {
   return (
     <div className="relative w-full h-screen bg-green-900 overflow-hidden flex items-center justify-center font-sans">
       <SessionControls />
+      
+      {/* Info Panel Toggle */}
+      <button 
+        onClick={() => setShowInfoPanel(!showInfoPanel)}
+        className="absolute top-[60px] right-4 z-50 bg-gray-800 text-white p-2 rounded border border-gray-600 hover:bg-gray-700 shadow-lg flex items-center gap-2"
+        title="Toggle Info Panel"
+      >
+        {showInfoPanel ? <X size={20} /> : <List size={20} />}
+        <span className="text-xs font-bold hidden md:inline">INFO</span>
+      </button>
+
+      {/* Info Panel Overlay */}
+      {showInfoPanel && (
+         <div className="absolute top-[100px] right-4 w-80 h-[400px] z-50 flex flex-col bg-gray-900 rounded-lg border border-gray-600 shadow-2xl overflow-hidden">
+            <div className="flex bg-gray-800 border-b border-gray-700">
+               <button 
+                 className={clsx("flex-1 py-3 text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-700 transition-colors", infoTab === 'history' ? "bg-gray-700 text-white border-b-2 border-blue-500" : "text-gray-400")}
+                 onClick={() => setInfoTab('history')}
+               >
+                 <List size={14} /> HISTORY
+               </button>
+               <button 
+                 className={clsx("flex-1 py-3 text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-700 transition-colors", infoTab === 'stats' ? "bg-gray-700 text-white border-b-2 border-blue-500" : "text-gray-400")}
+                 onClick={() => setInfoTab('stats')}
+               >
+                 <BarChart2 size={14} /> STATS
+               </button>
+            </div>
+            
+            <div className="flex-1 overflow-hidden relative p-0 bg-black/50">
+                {infoTab === 'history' ? (
+                    <HistoryLog className="w-full h-full !rounded-none !border-0" />
+                ) : (
+                    <SessionStats className="w-full h-full !rounded-none !border-0" />
+                )}
+            </div>
+         </div>
+      )}
+
       {/* Table Surface */}
       <div className="relative w-[90vw] h-[60vh] md:w-[80vw] md:h-[70vh] bg-[#0F4C0F] rounded-[200px] border-[16px] border-[#3e2723] shadow-2xl flex flex-col items-center justify-center">
         {/* Table Logo / Pattern */}
@@ -68,9 +111,6 @@ export const Table: React.FC = () => {
         <div className="bg-black bg-opacity-40 px-6 py-2 rounded-full text-white font-mono text-xl border border-yellow-500 shadow-inner z-10">
           Pot: <span className="text-yellow-400">${pot}</span>
         </div>
-        
-        <HistoryLog />
-        <SessionStats />
       </div>
 
       {/* Players */}

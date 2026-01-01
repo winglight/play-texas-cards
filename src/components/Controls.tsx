@@ -46,7 +46,7 @@ export const Controls: React.FC<ControlsProps> = ({
   const canCheck = toCall === 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 bg-opacity-90 p-4 border-t border-gray-700 text-white flex flex-col items-center gap-4">
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 bg-opacity-90 p-2 border-t border-gray-700 text-white flex flex-col items-center gap-2">
       {/* Bet Slider (only show if we can raise) */}
       {maxRaiseTo >= minRaiseTo && (
         <div className="w-full max-w-md flex items-center gap-4">
@@ -66,10 +66,10 @@ export const Controls: React.FC<ControlsProps> = ({
       )}
 
       {/* Buttons */}
-      <div className="flex gap-4">
+      <div className="flex gap-2">
         <button
           onClick={() => onAction('fold')}
-          className="px-6 py-3 rounded-lg bg-red-600 hover:bg-red-700 font-bold shadow-lg transition-colors"
+          className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 font-bold shadow-lg transition-colors text-sm"
         >
           Fold
         </button>
@@ -77,33 +77,33 @@ export const Controls: React.FC<ControlsProps> = ({
         {canCheck ? (
           <button
             onClick={() => onAction('check')}
-            className="px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 font-bold shadow-lg transition-colors"
+            className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 font-bold shadow-lg transition-colors text-sm"
           >
             Check
           </button>
         ) : (
           <button
             onClick={() => onAction('call')}
-            className="px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 font-bold shadow-lg transition-colors flex flex-col items-center leading-none"
+            className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 font-bold shadow-lg transition-colors flex items-center gap-1 text-sm"
           >
             <span>Call</span>
-            <span className="text-xs opacity-80 mt-1">${toCall}</span>
+            <span className="opacity-80">${toCall}</span>
           </button>
         )}
 
         {maxRaiseTo >= minRaiseTo && (
           <button
             onClick={handleRaise}
-            className="px-6 py-3 rounded-lg bg-yellow-600 hover:bg-yellow-700 font-bold shadow-lg transition-colors flex flex-col items-center leading-none"
+            className="px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-700 font-bold shadow-lg transition-colors flex items-center gap-1 text-sm"
           >
             <span>Raise to</span>
-            <span className="text-xs opacity-80 mt-1">${raiseAmount}</span>
+            <span className="opacity-80">${raiseAmount}</span>
           </button>
         )}
         
         <button
             onClick={handleAllIn}
-            className="px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 font-bold shadow-lg transition-colors"
+            className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 font-bold shadow-lg transition-colors text-sm"
         >
             All In
         </button>

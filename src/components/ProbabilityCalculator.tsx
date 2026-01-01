@@ -37,7 +37,7 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({
   if (heroCards.length !== 2) return null;
 
   return (
-    <div className="absolute top-20 left-4 bg-black bg-opacity-70 p-4 rounded-lg text-white text-sm border border-gray-600 shadow-xl pointer-events-none">
+    <div className="absolute bottom-[140px] right-4 bg-black bg-opacity-70 p-4 rounded-lg text-white text-sm border border-gray-600 shadow-xl pointer-events-none z-40">
       <h3 className="font-bold text-gray-300 mb-2 uppercase text-xs tracking-wider">Probability</h3>
       
       <div className="space-y-2">

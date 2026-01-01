@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { PlayCircle } from 'lucide-react';
 import { Session } from '../types/poker';
 
-export const SessionStats: React.FC = () => {
+export const SessionStats: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ className, style }) => {
   const { currentSessionId, sessions, players, startReplay, stage, winners } = useGameStore();
   const [activeTab, setActiveTab] = useState<'hands' | 'leaderboard'>('hands');
   
@@ -47,7 +47,10 @@ export const SessionStats: React.FC = () => {
       .sort((a, b) => b.total - a.total);
 
   return (
-    <div className="absolute bottom-[5%] right-[5%] w-64 h-64 bg-black bg-opacity-70 rounded-lg border border-gray-600 flex flex-col overflow-hidden z-20 shadow-xl pointer-events-auto">
+    <div 
+      className={clsx("flex flex-col overflow-hidden bg-black bg-opacity-70 rounded-lg border border-gray-600 pointer-events-auto", className)}
+      style={style}
+    >
        <div className="flex border-b border-gray-600">
            <button 
              className={clsx("flex-1 py-1 text-xs font-bold", activeTab === 'hands' ? "bg-gray-700 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700")}
