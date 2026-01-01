@@ -6,8 +6,7 @@ import { Controls } from './Controls';
 import { HistoryLog } from './HistoryLog';
 import { SessionStats } from './SessionStats';
 import { SessionControls } from './SessionControls';
-import clsx from 'clsx';
-import { List, BarChart2, X } from 'lucide-react';
+import { List, X } from 'lucide-react';
 
 // Pre-defined positions for 9 players
 // [top%, left%]
@@ -15,10 +14,10 @@ const PLAYER_POSITIONS = [
   { bottom: '18%', left: '50%', transform: 'translateX(-50%)' }, // User (Bottom Center) - Moved down closer to controls
   { bottom: '25%', left: '5%', transform: 'translate(0, 0)' }, // Bottom Left
   { top: '45%', left: '5%', transform: 'translate(0, -50%)' }, // Left
-  { top: '15%', left: '13%', transform: 'translate(-50%, 0)' }, // Top Left
-  { top: '15%', left: '38%', transform: 'translate(-50%, 0)' }, // Top Center Left
-  { top: '15%', left: '62%', transform: 'translate(-50%, 0)' }, // Top Center Right
-  { top: '18%', left: '87%', transform: 'translate(-50%, 0)' }, // Top Right
+  { top: '15%', left: '17%', transform: 'translate(-50%, 0)' }, // Top Left
+  { top: '15%', left: '42%', transform: 'translate(-50%, 0)' }, // Top Center Left
+  { top: '15%', left: '67%', transform: 'translate(-50%, 0)' }, // Top Center Right
+  { top: '18%', left: '90%', transform: 'translate(-50%, 0)' }, // Top Right
   { top: '45%', right: '5%', transform: 'translate(0, -50%)' }, // Right
   { bottom: '25%', right: '10%', transform: 'translate(50%, 0)' }, // Bottom Right
 ];
@@ -40,7 +39,6 @@ export const Table: React.FC = () => {
   } = useGameStore();
 
   const [showInfoPanel, setShowInfoPanel] = useState(false);
-  const [infoTab, setInfoTab] = useState<'history' | 'stats'>('history');
 
   const userIndex = 0; // Assuming user is always index 0 for now
   const user = players[userIndex];
@@ -67,27 +65,11 @@ export const Table: React.FC = () => {
       {/* Info Panel Overlay */}
       {showInfoPanel && (
          <div className="absolute top-[100px] right-4 w-80 h-[400px] z-50 flex flex-col bg-gray-900 rounded-lg border border-gray-600 shadow-2xl overflow-hidden">
-            <div className="flex bg-gray-800 border-b border-gray-700">
-               <button 
-                 className={clsx("flex-1 py-3 text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-700 transition-colors", infoTab === 'history' ? "bg-gray-700 text-white border-b-2 border-blue-500" : "text-gray-400")}
-                 onClick={() => setInfoTab('history')}
-               >
-                 <List size={14} /> HISTORY
-               </button>
-               <button 
-                 className={clsx("flex-1 py-3 text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-700 transition-colors", infoTab === 'stats' ? "bg-gray-700 text-white border-b-2 border-blue-500" : "text-gray-400")}
-                 onClick={() => setInfoTab('stats')}
-               >
-                 <BarChart2 size={14} /> STATS
-               </button>
+            <div className="flex-1 overflow-hidden relative p-0 bg-black/50 border-b border-gray-700">
+                <HistoryLog className="w-full h-full !rounded-none !border-0" />
             </div>
-            
             <div className="flex-1 overflow-hidden relative p-0 bg-black/50">
-                {infoTab === 'history' ? (
-                    <HistoryLog className="w-full h-full !rounded-none !border-0" />
-                ) : (
-                    <SessionStats className="w-full h-full !rounded-none !border-0" />
-                )}
+                <SessionStats className="w-full h-full !rounded-none !border-0" />
             </div>
          </div>
       )}
