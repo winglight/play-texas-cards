@@ -191,6 +191,26 @@ export const useGameStore = create<GameStore>()(
         const { playerCount, startingChips, bigBlind } = settings;
         const smallBlind = bigBlind / 2;
 
+        // Strategy Distribution
+        let strategies: ('beginner' | 'veteran' | 'pro' | 'random')[] = [];
+        if (playerCount === 6) {
+            // 5 bots: 1H, 1M, 1L, 2R
+            strategies = ['pro', 'veteran', 'beginner', 'random', 'random'];
+        } else if (playerCount === 9) {
+            // 8 bots: 2H, 2M, 2L, 2R
+            strategies = ['pro', 'pro', 'veteran', 'veteran', 'beginner', 'beginner', 'random', 'random'];
+        } else {
+             // Fallback
+             const count = playerCount - 1;
+             strategies = Array(count).fill('beginner');
+        }
+
+        // Shuffle strategies
+        for (let i = strategies.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [strategies[i], strategies[j]] = [strategies[j], strategies[i]];
+        }
+
         const players: Player[] = Array.from({ length: playerCount }, (_, i) => ({
           id: `player-${i}`,
           name: i === 0 ? 'You' : `Bot ${i}`,
@@ -202,7 +222,7 @@ export const useGameStore = create<GameStore>()(
           currentBet: 0,
           totalBet: 0,
           isAi: i !== 0,
-          aiStrategy: 'conservative', // Default strategy
+          aiStrategy: i === 0 ? undefined : strategies[i - 1],
         }));
         
         // Check if we need a new session

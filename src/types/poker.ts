@@ -42,7 +42,7 @@ export interface Player {
   currentBet: number; // Bet in current round
   totalBet: number; // Total bet in hand
   isAi: boolean;
-  aiStrategy?: 'conservative' | 'aggressive' | 'calculative';
+  aiStrategy?: 'beginner' | 'veteran' | 'pro' | 'random';
   action?: PlayerActionType; // Current round action
   lastAction?: string; // Persistent last action description
 }
