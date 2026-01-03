@@ -103,7 +103,29 @@ export const SinglePlayerPage: React.FC = () => {
             <div className="mb-6 space-y-2">
               {winners.map((winner, i) => {
                 const player = players.find(p => p.id === winner.playerId);
-                const actualProfit = winner.amount - (player?.totalBet || 0); // Calculate actual profit
+                
+                // Calculate total bet with fallback to history/blinds if store value is missing
+                let playerTotalBet = player?.totalBet || 0;
+                
+                if (playerTotalBet === 0 && player) {
+                  // Fallback: Try to reconstruct from history and blinds
+                  // Add Blinds
+                  if (players[gameState.smallBlindPosition]?.id === player.id) {
+                      playerTotalBet += gameState.smallBlind;
+                  }
+                  if (players[gameState.bigBlindPosition]?.id === player.id) {
+                      playerTotalBet += gameState.bigBlind;
+                  }
+                  
+                  // Add History
+                  gameState.currentHandHistory.forEach(entry => {
+                      if (entry.playerId === player.id && entry.amount) {
+                          playerTotalBet += entry.amount;
+                      }
+                  });
+                }
+
+                const actualProfit = winner.amount - playerTotalBet;
                 
                 return (
                   <div key={i} className="text-lg">

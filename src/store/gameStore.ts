@@ -457,17 +457,19 @@ export const useGameStore = create<GameStore>()(
         } else if (action === 'raise' && amount) {
           const raiseTo = amount;
           const maxBet = currentPlayer.chips + currentPlayer.currentBet;
+          const needed = raiseTo - currentPlayer.currentBet;
           
           // If raise amount exceeds player's total assets, treat as All-in
-          if (raiseTo >= maxBet) {
+          // Also check if needed amount exceeds available chips (double check to prevent negative chips)
+          if (raiseTo >= maxBet || needed > currentPlayer.chips) {
              return get().playerAction('all-in');
           }
 
-          const needed = raiseTo - currentPlayer.currentBet;
           const increase = raiseTo - currentBet;
           if (increase > 0) {
               nextMinRaise = increase;
           }
+          
           currentPlayer.chips -= needed;
           currentPlayer.currentBet = raiseTo;
           currentPlayer.totalBet += needed;
