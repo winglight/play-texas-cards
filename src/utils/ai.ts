@@ -9,6 +9,14 @@ export const getAiAction = (
   const { communityCards, currentBet, pot, bigBlind, minRaise } = gameState;
   const toCall = currentBet - player.currentBet;
   const activeOpponents = gameState.players.filter(p => p.isActive && p.id !== player.id).length;
+  const maxChips = player.chips + player.currentBet;
+
+  const safeRaise = (targetAmount: number): { action: PlayerActionType; amount?: number } => {
+      if (targetAmount >= maxChips) {
+          return { action: 'all-in' };
+      }
+      return { action: 'raise', amount: targetAmount };
+  };
 
   // Safety check
   if (!player.holeCards || player.holeCards.length < 2) {
@@ -28,20 +36,64 @@ export const getAiAction = (
     // Allow all-in
     validActions.push('all-in');
 
-    const randomAction = validActions[Math.floor(Math.random() * validActions.length)];
+    // Weighted Random Selection
+    // All-in: 2%
+    // Others: Distributed evenly among remaining 98%
+    const rand = Math.random();
     
-    if (randomAction === 'raise') {
+    // Check if All-in is selected (2% chance)
+    if (rand < 0.02) {
+        return { action: 'all-in' };
+    }
+    
+    // Remove all-in from valid actions for the remaining distribution
+    const otherActions = validActions.filter(a => a !== 'all-in');
+    const actionIndex = Math.floor(Math.random() * otherActions.length);
+    const selectedAction = otherActions[actionIndex];
+    
+    if (selectedAction === 'raise') {
         const maxRaise = player.chips + player.currentBet;
         const minR = currentBet + minRaise;
         
         if (maxRaise < minR) return { action: 'all-in' }; // Not enough to min raise
         
-        // Random amount between minR and maxRaise
-        const randomAmt = Math.floor(Math.random() * (maxRaise - minR + 1)) + minR;
-        return { action: 'raise', amount: randomAmt };
+        const randRaise = Math.random();
+        let raiseAmount = minR;
+
+        // Determine Min-Raise probability based on Pot Size
+        // If currentBet is large (> 20BB), discourage Min-Raise to avoid infinite loops
+        const isHighStakes = currentBet > bigBlind * 10;
+        
+        if (randRaise < 0.5) {
+            // 50% chance: Minimum amount (or Pot/2 if high stakes)
+             if (isHighStakes) {
+                 raiseAmount = Math.max(minR, Math.floor(pot / 2));
+             } else {
+                 raiseAmount = minR;
+             }
+        } else if (randRaise < 0.75) {
+            // 25% chance: 2x Minimum amount (or Pot Size if high stakes)
+            if (isHighStakes) {
+                 raiseAmount = Math.max(minR * 2, pot);
+            } else {
+                raiseAmount = minR * 2;
+            }
+        } else {
+             // 25% chance: Random amount
+             if (maxRaise > minR) {
+                 raiseAmount = Math.floor(Math.random() * (maxRaise - minR + 1)) + minR;
+             }
+        }
+        
+        // Cap at maxRaise
+        if (raiseAmount > maxRaise) {
+            raiseAmount = maxRaise;
+        }
+
+        return { action: 'raise', amount: Math.floor(raiseAmount) };
     }
     
-    return { action: randomAction };
+    return { action: selectedAction };
   }
 
   // --- Pro Strategy (H) ---
@@ -57,7 +109,7 @@ export const getAiAction = (
     if (toCall === 0) {
         if (equity > 0.6) {
              // Value bet
-             return { action: 'raise', amount: currentBet + minRaise };
+             return safeRaise(currentBet + minRaise);
         }
         return { action: 'check' };
     }
@@ -66,7 +118,7 @@ export const getAiAction = (
         // Positive EV
         if (equity > 0.75) {
              // Strong value raise
-             return { action: 'raise', amount: currentBet + minRaise * 2 };
+             return safeRaise(currentBet + minRaise * 2);
         }
         return { action: 'call' };
     } else {
@@ -74,7 +126,7 @@ export const getAiAction = (
         // Bluff opportunity? Pro might bluff with blockers (simulated by small random chance if EV is close)
         // If EV is slightly negative (e.g. > -1BB), maybe float
         if (ev > -bigBlind && Math.random() < 0.1) {
-             return { action: 'raise', amount: currentBet + minRaise };
+             return safeRaise(currentBet + minRaise);
         }
         return { action: 'fold' };
     }
@@ -99,11 +151,11 @@ export const getAiAction = (
           const decent = isHigh || (isSuited && isConnected) || isPair;
           
           if (toCall > 0) {
-              if (strong) return { action: 'raise', amount: currentBet + minRaise };
+              if (strong) return safeRaise(currentBet + minRaise);
               if (decent) return { action: 'call' };
               return { action: 'fold' };
           } else {
-              if (strong) return { action: 'raise', amount: currentBet + minRaise };
+              if (strong) return safeRaise(currentBet + minRaise);
               return { action: 'check' };
           }
       } else {
@@ -112,7 +164,7 @@ export const getAiAction = (
           
           if (rank >= HandRank.TwoPair) {
               // Strong -> Raise
-               return { action: 'raise', amount: currentBet + minRaise };
+               return safeRaise(currentBet + minRaise);
           }
           if (rank === HandRank.Pair) {
               // Pair -> Call
@@ -145,7 +197,7 @@ export const getAiAction = (
               // Always call with any pair
               if (toCall > 0) return { action: 'call' };
               // Random min-bet
-              if (Math.random() < 0.2) return { action: 'raise', amount: currentBet + minRaise };
+              if (Math.random() < 0.2) return safeRaise(currentBet + minRaise);
               return { action: 'check' };
           }
           

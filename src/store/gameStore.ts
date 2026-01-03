@@ -27,12 +27,18 @@ interface GameStore extends GameState {
   stopReplay: () => void;
   nextReplayStep: () => void;
   prevReplayStep: () => void;
+  nextStage: () => void;
   toggleReplay: () => void;
+  
+  // Tutorial
+  tutorialSeen: boolean;
+  setTutorialSeen: (seen: boolean) => void;
 }
 
-const INITIAL_STATE: Omit<GameState, 'players'> & { mode: 'single' | 'multi'; socket: WebSocket | null } = {
+const INITIAL_STATE: Omit<GameState, 'players'> & { mode: 'single' | 'multi'; socket: WebSocket | null; tutorialSeen: boolean } = {
   mode: 'single',
   socket: null,
+  tutorialSeen: false,
   communityCards: [],
   pot: 0,
   currentBet: 0,
@@ -187,9 +193,71 @@ export const useGameStore = create<GameStore>()(
           });
       },
 
+      setTutorialSeen: (seen) => set({ tutorialSeen: seen }),
+
+      nextStage: () => {
+          const { stage, deck, communityCards, players, dealerPosition, pot, currentHandHistory, currentSessionId, sessions, bigBlind } = get();
+          const nextStage = getNextStage(stage);
+          
+          const newPlayers = players.map(p => ({ ...p, currentBet: 0, action: undefined }));
+          
+          const newDeck = [...deck];
+          const newCommunityCards = [...communityCards];
+          
+          if (nextStage === 'flop') {
+              newCommunityCards.push(newDeck.pop()!, newDeck.pop()!, newDeck.pop()!);
+          } else if (nextStage === 'turn' || nextStage === 'river') {
+              newCommunityCards.push(newDeck.pop()!);
+          } else if (nextStage === 'showdown') {
+              const { sessionUpdates, updates } = completeShowdown(
+                  newPlayers,
+                  pot,
+                  communityCards,
+                  currentHandHistory,
+                  currentSessionId,
+                  sessions
+              );
+              set({ ...updates, sessions: sessionUpdates });
+              return;
+          }
+          
+          const activeNonAllIn = newPlayers.filter(p => p.isActive && !p.isAllIn);
+          let nextTurn = -1;
+          
+          if (activeNonAllIn.length > 0) {
+              nextTurn = (dealerPosition + 1) % newPlayers.length;
+              while (!newPlayers[nextTurn].isActive || newPlayers[nextTurn].isAllIn) {
+                  nextTurn = (nextTurn + 1) % newPlayers.length;
+              }
+          }
+          
+          set({
+              players: newPlayers,
+              pot,
+              currentBet: 0,
+              minRaise: bigBlind,
+              communityCards: newCommunityCards,
+              stage: nextStage,
+              deck: newDeck,
+              currentTurn: nextTurn,
+              currentHandHistory
+          });
+      },
+
       initGame: (settings) => {
         const { playerCount, startingChips, bigBlind } = settings;
         const smallBlind = bigBlind / 2;
+
+        // Create new session for new game to ensure chips match history
+        const sessionId = Date.now().toString();
+        const newSession: Session = {
+            id: sessionId,
+            startTime: Date.now(),
+            hands: []
+        };
+        
+        let { sessions } = get();
+        sessions = { ...sessions, [sessionId]: newSession };
 
         // Strategy Distribution
         let strategies: ('beginner' | 'veteran' | 'pro' | 'random')[] = [];
@@ -226,13 +294,8 @@ export const useGameStore = create<GameStore>()(
         }));
         
         // Check if we need a new session
-        let { currentSessionId, sessions } = get();
-        // If no session exists or ID is empty, create one
-        if (!currentSessionId || !sessions[currentSessionId]) {
-             const sessionId = Date.now().toString();
-             currentSessionId = sessionId;
-             sessions = { ...sessions, [sessionId]: { id: sessionId, startTime: Date.now(), hands: [] } };
-        }
+        // Force new session logic applied above
+        const currentSessionId = sessionId;
 
         set({
           ...INITIAL_STATE,
@@ -340,7 +403,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       playerAction: (action, amount) => {
-        const { players, currentTurn, currentBet, pot, stage, deck, communityCards, dealerPosition, minRaise, bigBlind, currentHandHistory } = get();
+        const { players, currentTurn, currentBet, pot, communityCards, minRaise, currentHandHistory } = get();
         // Safety check
         if (!players[currentTurn]) return;
 
@@ -393,6 +456,13 @@ export const useGameStore = create<GameStore>()(
           currentPlayer.lastAction = 'CHECK';
         } else if (action === 'raise' && amount) {
           const raiseTo = amount;
+          const maxBet = currentPlayer.chips + currentPlayer.currentBet;
+          
+          // If raise amount exceeds player's total assets, treat as All-in
+          if (raiseTo >= maxBet) {
+             return get().playerAction('all-in');
+          }
+
           const needed = raiseTo - currentPlayer.currentBet;
           const increase = raiseTo - currentBet;
           if (increase > 0) {
@@ -472,35 +542,6 @@ export const useGameStore = create<GameStore>()(
             return;
         }
 
-        // Check for Human All-In in Single Player
-        // Requirement: If human player chips empty, automatically end current round.
-        if (get().mode === 'single' && currentPlayer.id === players[0].id && currentPlayer.chips === 0) {
-             const newDeck = [...deck];
-             const newCommunityCards = [...communityCards];
-             
-             // Deal remaining community cards until 5
-             while (newCommunityCards.length < 5) {
-                 if (newDeck.length > 0) {
-                    newCommunityCards.push(newDeck.pop()!);
-                 } else {
-                    break; // Should not happen in standard deck
-                 }
-             }
-
-             const { currentSessionId, sessions } = get();
-             const { sessionUpdates, updates } = completeShowdown(
-                 newPlayers,
-                 nextPot,
-                 newCommunityCards,
-                 newHistory,
-                 currentSessionId,
-                 sessions
-             );
-
-             set({ ...updates, sessions: sessionUpdates, deck: newDeck });
-             return;
-        }
-
         // Check if round complete
         const activeNonAllIn = newPlayers.filter(p => p.isActive && !p.isAllIn);
         const allMatched = activeNonAllIn.every(p => p.currentBet === nextBet);
@@ -508,50 +549,17 @@ export const useGameStore = create<GameStore>()(
         const roundComplete = (activeNonAllIn.length === 0) || (allMatched && allActed);
 
         if (roundComplete) {
-            const nextStage = getNextStage(stage);
-            newPlayers.forEach(p => {
-                p.currentBet = 0;
-                p.action = undefined;
-            });
-
-            const newDeck = [...deck];
-            const newCommunityCards = [...communityCards];
-
-            if (nextStage === 'flop') {
-                newCommunityCards.push(newDeck.pop()!, newDeck.pop()!, newDeck.pop()!);
-            } else if (nextStage === 'turn' || nextStage === 'river') {
-                newCommunityCards.push(newDeck.pop()!);
-            } else if (nextStage === 'showdown') {
-                const { currentSessionId, sessions } = get();
-                const { sessionUpdates, updates } = completeShowdown(
-                    newPlayers,
-                    nextPot,
-                    communityCards, // use current community cards
-                    newHistory,
-                    currentSessionId,
-                    sessions
-                );
-                set({ ...updates, sessions: sessionUpdates });
-                return;
-            }
-
-            let nextTurn = (dealerPosition + 1) % newPlayers.length;
-            while (!newPlayers[nextTurn].isActive || newPlayers[nextTurn].isAllIn) {
-                nextTurn = (nextTurn + 1) % newPlayers.length;
-                if (activeNonAllIn.length === 0) break; 
-            }
-
+            // Commit current action first
             set({
                 players: newPlayers,
                 pot: nextPot,
-                currentBet: 0,
-                minRaise: bigBlind,
-                communityCards: newCommunityCards,
-                stage: nextStage,
-                deck: newDeck,
-                currentTurn: activeNonAllIn.length > 0 ? nextTurn : -1,
+                currentBet: nextBet,
+                minRaise: nextMinRaise,
                 currentHandHistory: newHistory
             });
+            
+            // Proceed to next stage
+            get().nextStage();
 
         } else {
             let nextTurn = (currentTurn + 1) % newPlayers.length;
@@ -571,12 +579,13 @@ export const useGameStore = create<GameStore>()(
       },
 
       resetGame: () => {
-          // Keep sessions, but reset everything else to INITIAL_STATE
-          const { sessions } = get();
+          // Keep sessions and tutorial status, but reset everything else to INITIAL_STATE
+          const { sessions, tutorialSeen } = get();
           set({
               ...INITIAL_STATE,
               players: [], // Explicitly clear players because INITIAL_STATE does not include it
               sessions,
+              tutorialSeen, // Preserve tutorial seen status
               // Do NOT preserve currentSessionId. Let it reset to '' from INITIAL_STATE.
               // This ensures next game starts a fresh session.
           });
@@ -587,6 +596,7 @@ export const useGameStore = create<GameStore>()(
       partialize: (state) => ({
         sessions: state.sessions,
         currentSessionId: state.currentSessionId,
+        tutorialSeen: state.tutorialSeen,
       }),
     }
   )

@@ -7,6 +7,7 @@ import { HistoryLog } from './HistoryLog';
 import { SessionStats } from './SessionStats';
 import { SessionControls } from './SessionControls';
 import { List, X } from 'lucide-react';
+import { TutorialModal } from './TutorialModal';
 
 // Pre-defined positions for 9 players
 // [top%, left%]
@@ -34,8 +35,10 @@ export const Table: React.FC = () => {
     currentTurn,
     playerAction,
     bigBlind,
+    smallBlind,
     minRaise,
-    stage
+    stage,
+    tutorialSeen
   } = useGameStore();
 
   const [showInfoPanel, setShowInfoPanel] = useState(false);
@@ -50,6 +53,7 @@ export const Table: React.FC = () => {
 
   return (
     <div className="relative w-full h-screen bg-green-900 overflow-hidden flex items-center justify-center font-sans">
+      {!tutorialSeen && <TutorialModal />}
       <SessionControls />
       
       {/* Info Panel Toggle */}
@@ -82,11 +86,17 @@ export const Table: React.FC = () => {
         </div>
 
         {/* Community Cards */}
-        <div className="flex gap-2 mb-8 z-10 min-h-[96px]">
-          {communityCards.map((card, i) => (
-            <Card key={i} card={card} size="md" />
-          ))}
-          {/* Placeholders for cards to come? Maybe not needed */}
+        <div className="flex gap-2 mb-8 z-10 min-h-[96px] items-center justify-center">
+          {stage === 'preflop' || communityCards.length === 0 ? (
+              <div className="text-yellow-500/50 font-serif text-lg text-center border border-yellow-500/30 rounded px-4 py-2 bg-black/20 animate-pulse">
+                  <div className="font-bold tracking-widest">PRE-FLOP</div>
+                  <div className="text-sm text-yellow-500/70">Blinds: {smallBlind}/{bigBlind}</div>
+              </div>
+          ) : (
+            communityCards.map((card, i) => (
+              <Card key={i} card={card} size="md" />
+            ))
+          )}
         </div>
 
         {/* Pot */}

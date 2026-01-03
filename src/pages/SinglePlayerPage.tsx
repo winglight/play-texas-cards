@@ -55,6 +55,16 @@ export const SinglePlayerPage: React.FC = () => {
     }
   }, [currentTurn, players, stage, playerAction, gameState]);
 
+  // Auto-advance if everyone is all-in or no one can act
+  useEffect(() => {
+    if (currentTurn === -1 && stage !== 'showdown' && stage !== 'waiting' && winners.length === 0) {
+        const timer = setTimeout(() => {
+            gameState.nextStage();
+        }, 1000);
+        return () => clearTimeout(timer);
+    }
+  }, [currentTurn, stage, winners.length, gameState]);
+
   if (!settings && players.length === 0) {
       return (
           <div className="relative w-full h-screen bg-gray-900">
@@ -69,9 +79,6 @@ export const SinglePlayerPage: React.FC = () => {
           </div>
       );
   }
-
-  // Auto-advance if everyone is all-in or no one can act? 
-  // For now let's stick to manual or turn-based.
 
   return (
     <div className="relative w-full h-screen bg-gray-900">
@@ -96,10 +103,12 @@ export const SinglePlayerPage: React.FC = () => {
             <div className="mb-6 space-y-2">
               {winners.map((winner, i) => {
                 const player = players.find(p => p.id === winner.playerId);
+                const actualProfit = winner.amount - (player?.totalBet || 0); // Calculate actual profit
+                
                 return (
                   <div key={i} className="text-lg">
                     <span className="font-bold">{player?.name}</span> won 
-                    <span className="text-yellow-600 font-bold"> ${winner.amount}</span>
+                    <span className="text-yellow-600 font-bold"> ${actualProfit}</span>
                     {winner.hand && (
                       <span className="text-gray-600"> with {winner.hand.name}</span>
                     )}
