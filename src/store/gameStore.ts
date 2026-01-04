@@ -77,7 +77,7 @@ export const useGameStore = create<GameStore>()(
       updateState: (newState) => set((state) => ({ ...state, ...newState })),
 
       startNewSession: () => {
-        const { currentSessionId, sessions } = get();
+        const { currentSessionId, sessions, players, settings } = get();
         
         // If current session exists and has no hands, reuse it
         if (currentSessionId && sessions[currentSessionId] && sessions[currentSessionId].hands.length === 0) {
@@ -94,10 +94,16 @@ export const useGameStore = create<GameStore>()(
         }
 
         const sessionId = Date.now().toString();
+        // Infer player count and total seats from current state or settings
+        const playerCount = players.length > 0 ? players.length : (settings?.playerCount || 6);
+        const totalSeats = settings?.playerCount || 6;
+
         const newSession: Session = {
             id: sessionId,
             startTime: Date.now(),
-            hands: []
+            hands: [],
+            playerCount,
+            totalSeats
         };
         set(state => ({
             currentSessionId: sessionId,
@@ -215,7 +221,8 @@ export const useGameStore = create<GameStore>()(
                   communityCards,
                   currentHandHistory,
                   currentSessionId,
-                  sessions
+                  sessions,
+                  get().initialDeck
               );
               set({ ...updates, sessions: sessionUpdates });
               return;
@@ -253,7 +260,9 @@ export const useGameStore = create<GameStore>()(
         const newSession: Session = {
             id: sessionId,
             startTime: Date.now(),
-            hands: []
+            hands: [],
+            playerCount,
+            totalSeats: playerCount === 9 ? 9 : 6 // Assuming 6 or 9 max
         };
         
         let { sessions } = get();
@@ -375,6 +384,8 @@ export const useGameStore = create<GameStore>()(
 
         // Deal cards
         const deck = createDeck();
+        const initialDeck = [...deck]; // Capture full deck before dealing
+        
         for (const player of activePlayers) {
           if (player.isActive) {
             player.holeCards = [deck.pop()!, deck.pop()!];
@@ -388,6 +399,7 @@ export const useGameStore = create<GameStore>()(
         set({
           players: activePlayers,
           deck,
+          initialDeck,
           communityCards: [],
           pot: sbAmount + bbAmount,
           currentBet: bigBlind,
@@ -512,6 +524,23 @@ export const useGameStore = create<GameStore>()(
             historyEntry.description = `ALL-IN $${needed} (Win: ${winRate.toFixed(1)}%)`;
         }
         
+        // Create Snapshot
+        historyEntry.snapshot = {
+            pot: nextPot,
+            communityCards: [...communityCards],
+            players: newPlayers.map(p => ({
+                id: p.id,
+                name: p.name,
+                chips: p.chips,
+                currentBet: p.currentBet,
+                totalBet: p.totalBet,
+                isActive: p.isActive,
+                isAllIn: p.isAllIn,
+                action: p.action,
+                holeCards: p.holeCards
+            }))
+        };
+
         // Update history
         const newHistory = [...currentHandHistory, historyEntry];
 
@@ -537,6 +566,7 @@ export const useGameStore = create<GameStore>()(
                 newHistory,
                 currentSessionId,
                 sessions,
+                get().initialDeck,
                 winnersList
             );
             
@@ -621,6 +651,7 @@ const completeShowdown = (
     history: HandHistoryEntry[],
     currentSessionId: string,
     sessions: Record<string, Session>,
+    initialDeck?: Card[],
     precalculatedWinners?: { playerId: string; amount: number; hand?: HandEvaluation }[]
 ): { sessionUpdates: Record<string, Session>; updates: Partial<GameState> } => {
     
@@ -672,7 +703,8 @@ const completeShowdown = (
             timestamp: Date.now(),
             winners: winnerInfo!,
             playerPnLs: pnl,
-            history: history
+            history: history,
+            initialDeck: initialDeck
         };
         
         const updatedSession = {

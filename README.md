@@ -5,13 +5,13 @@ A modern Texas Hold'em poker game built with React, TypeScript, and Vite.
 ## Demo
 
 Experience the game here: [https://holdem.broyustudio.com/](https://holdem.broyustudio.com/)
-
+![Screenshots](images/screenshots.png)
 ## Features
 
 - **Single Player**: Practice against AI opponents.
-- **Multiplayer**: Create rooms and play with friends.
+- **Multiplayer(Under Development)**: Create rooms and play with friends.
 - **Modern UI**: Clean and responsive interface built with Tailwind CSS.
-- **Game Logic**: Real-time probability calculation and robust poker rules.
+- **Game Logic**: Real-time probability calculation with three level of AI opponents and robust poker rules.
 
 ## Tech Stack
 

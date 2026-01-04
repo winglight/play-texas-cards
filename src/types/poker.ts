@@ -47,6 +47,24 @@ export interface Player {
   lastAction?: string; // Persistent last action description
 }
 
+export interface PlayerSnapshot {
+  id: string;
+  name: string;
+  chips: number;
+  currentBet: number;
+  totalBet: number;
+  isActive: boolean;
+  isAllIn: boolean;
+  action?: PlayerActionType;
+  holeCards: Card[];
+}
+
+export interface GameSnapshot {
+  pot: number;
+  communityCards: Card[];
+  players: PlayerSnapshot[];
+}
+
 export interface HandHistoryEntry {
   playerId: string;
   playerName: string;
@@ -56,6 +74,7 @@ export interface HandHistoryEntry {
   winRate?: number;
   timestamp: number;
   description: string;
+  snapshot?: GameSnapshot;
 }
 
 export interface HandResult {
@@ -64,6 +83,7 @@ export interface HandResult {
   winners: { playerId: string; amount: number; hand?: HandEvaluation }[];
   playerPnLs: Record<string, number>;
   history: HandHistoryEntry[]; // Full action history for replay
+  initialDeck?: Card[];
 }
 
 export type TableType = 'nl' | 'pl' | 'fl';
@@ -81,6 +101,8 @@ export interface Session {
   startTime: number;
   endTime?: number;
   hands: HandResult[];
+  playerCount?: number;
+  totalSeats?: number;
 }
 
 export interface GameState {
@@ -95,6 +117,7 @@ export interface GameState {
   currentTurn: number; // Index of player whose turn it is
   stage: GameStage;
   deck: Card[];
+  initialDeck?: Card[]; // Store initial deck for replay
   smallBlind: number;
   bigBlind: number;
   minRaise: number;
