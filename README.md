@@ -12,6 +12,7 @@ Experience the game here: [https://holdem.broyustudio.com/](https://holdem.broyu
 - **Multiplayer(Under Development)**: Create rooms and play with friends.
 - **Modern UI**: Clean and responsive interface built with Tailwind CSS.
 - **Game Logic**: Real-time probability calculation with three level of AI opponents and robust poker rules.
+- **Hand Replay**: Review hand history with detailed game state (cards, chips, pot) at every step and reveal all player hole cards.
 
 ## Tech Stack
 
