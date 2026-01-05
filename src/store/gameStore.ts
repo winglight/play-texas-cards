@@ -467,7 +467,14 @@ export const useGameStore = create<GameStore>()(
           currentPlayer.action = 'check';
           currentPlayer.lastAction = 'CHECK';
         } else if (action === 'raise' && amount) {
-          const raiseTo = amount;
+          let raiseTo = amount;
+          const activeOpponents = newPlayers.filter(p => p.isActive && p.id !== currentPlayer.id);
+          if (activeOpponents.length === 1) {
+              const opponent = activeOpponents[0];
+              const opponentMaxBet = opponent.currentBet + opponent.chips;
+              raiseTo = Math.min(raiseTo, opponentMaxBet);
+          }
+
           const maxBet = currentPlayer.chips + currentPlayer.currentBet;
           const needed = raiseTo - currentPlayer.currentBet;
           
@@ -475,6 +482,10 @@ export const useGameStore = create<GameStore>()(
           // Also check if needed amount exceeds available chips (double check to prevent negative chips)
           if (raiseTo >= maxBet || needed > currentPlayer.chips) {
              return get().playerAction('all-in');
+          }
+          // If raise target is not actually above current bet, treat it as a call/check.
+          if (raiseTo <= currentBet) {
+              return get().playerAction(currentBet > currentPlayer.currentBet ? 'call' : 'check');
           }
 
           const increase = raiseTo - currentBet;

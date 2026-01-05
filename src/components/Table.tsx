@@ -93,6 +93,10 @@ export const Table: React.FC = () => {
 
   // Need to call amount calculation
   const toCall = currentBet - user.currentBet;
+  const activeOpponents = players.filter(p => p.isActive && p.id !== user.id);
+  const maxRaiseToCap = activeOpponents.length === 1
+    ? activeOpponents[0].chips + activeOpponents[0].currentBet
+    : undefined;
 
   return (
     <div className="relative w-full h-screen bg-green-900 overflow-hidden flex items-center justify-center font-sans">
@@ -190,6 +194,7 @@ export const Table: React.FC = () => {
           chips={user.chips}
           currentBet={user.currentBet}
           bigBlind={bigBlind}
+          maxRaiseToCap={maxRaiseToCap}
         />
       )}
     </div>

@@ -8,6 +8,7 @@ interface ControlsProps {
   chips: number; // Player's remaining chips
   currentBet: number; // Amount player already bet in this round
   bigBlind: number;
+  maxRaiseToCap?: number;
 }
 
 export const Controls: React.FC<ControlsProps> = ({
@@ -16,7 +17,8 @@ export const Controls: React.FC<ControlsProps> = ({
   minRaise,
   chips,
   currentBet,
-  bigBlind
+  bigBlind,
+  maxRaiseToCap
 }) => {
   // Slider value represents the total ADDITIONAL amount to put in? 
   // Or the total bet amount?
@@ -27,7 +29,8 @@ export const Controls: React.FC<ControlsProps> = ({
   
   const currentTotalPotBet = currentBet + toCall; // The current high bet on table
   const minRaiseTo = currentTotalPotBet + Math.max(minRaise, bigBlind);
-  const maxRaiseTo = currentBet + chips; // All-in amount
+  const baseMaxRaiseTo = currentBet + chips; // All-in amount
+  const maxRaiseTo = maxRaiseToCap ? Math.min(baseMaxRaiseTo, maxRaiseToCap) : baseMaxRaiseTo;
 
   const [raiseAmount, setRaiseAmount] = useState(minRaiseTo);
 
@@ -40,7 +43,7 @@ export const Controls: React.FC<ControlsProps> = ({
   };
 
   const handleAllIn = () => {
-    onAction('all-in', maxRaiseTo);
+    onAction('all-in', baseMaxRaiseTo);
   };
 
   const canCheck = toCall === 0;

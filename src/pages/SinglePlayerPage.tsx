@@ -96,8 +96,8 @@ export const SinglePlayerPage: React.FC = () => {
 
       {/* Showdown / Round End Overlay */}
       {stage === 'showdown' && (
-        <div className="absolute inset-0 z-40 bg-black bg-opacity-50 flex flex-col items-center justify-center pointer-events-auto">
-          <div className="bg-white p-8 rounded-xl shadow-2xl text-center max-w-lg">
+        <div className="absolute inset-0 z-40 bg-black bg-opacity-50 flex flex-col items-center justify-start pt-32 pointer-events-auto">
+          <div className="bg-white bg-opacity-90 p-8 rounded-xl shadow-2xl text-center max-w-lg">
             <h2 className="text-3xl font-bold mb-4 text-green-700">Hand Completed</h2>
             
             <div className="mb-6 space-y-2">
