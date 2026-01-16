@@ -18,21 +18,12 @@ export const SinglePlayerPage: React.FC = () => {
     stage, 
     winners,
     settings,
-    resetGame,
-    startNewHand // Import startNewHand
   } = gameState;
 
   const user = players[0];
   const activeOpponents = players.filter(p => p.isActive && p.id !== user?.id).length;
 
-  const handleContinue = () => {
-      startNewHand();
-  };
 
-  const handleEndSession = () => {
-      resetGame();
-      navigate('/');
-  };
 
   // Auto-end round if user is bankrupt (This is now handled by gameStore logic mostly, 
   // but we keep this for UI reaction if needed, though gameStore now sets stage to showdown automatically)
@@ -94,72 +85,7 @@ export const SinglePlayerPage: React.FC = () => {
         activeOpponentsCount={activeOpponents}
       />
 
-      {/* Showdown / Round End Overlay */}
-      {stage === 'showdown' && (
-        <div className="absolute inset-0 z-40 bg-black bg-opacity-50 flex flex-col items-center justify-start pt-32 pointer-events-auto">
-          <div className="bg-white bg-opacity-90 p-8 rounded-xl shadow-2xl text-center max-w-lg">
-            <h2 className="text-3xl font-bold mb-4 text-green-700">Hand Completed</h2>
-            
-            <div className="mb-6 space-y-2">
-              {winners.map((winner, i) => {
-                const player = players.find(p => p.id === winner.playerId);
-                
-                // Calculate total bet with fallback to history/blinds if store value is missing
-                let playerTotalBet = player?.totalBet || 0;
-                
-                if (playerTotalBet === 0 && player) {
-                  // Fallback: Try to reconstruct from history and blinds
-                  // Add Blinds
-                  if (players[gameState.smallBlindPosition]?.id === player.id) {
-                      playerTotalBet += gameState.smallBlind;
-                  }
-                  if (players[gameState.bigBlindPosition]?.id === player.id) {
-                      playerTotalBet += gameState.bigBlind;
-                  }
-                  
-                  // Add History
-                  gameState.currentHandHistory.forEach(entry => {
-                      if (entry.playerId === player.id && entry.amount) {
-                          playerTotalBet += entry.amount;
-                      }
-                  });
-                }
-
-                const actualProfit = winner.amount - playerTotalBet;
-                
-                return (
-                  <div key={i} className="text-lg">
-                    <span className="font-bold">{player?.name}</span> won 
-                    <span className="text-yellow-600 font-bold"> ${actualProfit}</span>
-                    {winner.hand && (
-                      <span className="text-gray-600"> with {winner.hand.name}</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="flex gap-4 justify-center">
-              {/* Only show Continue if user has chips */}
-              {user?.chips > 0 && (
-                <button 
-                  onClick={handleContinue}
-                  className="px-8 py-3 bg-blue-600 text-white text-xl font-bold rounded-lg hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
-                >
-                  Continue
-                </button>
-              )}
-              
-              <button 
-                onClick={handleEndSession}
-                className="px-8 py-3 bg-red-600 text-white text-xl font-bold rounded-lg hover:bg-red-700 shadow-lg transform hover:scale-105 transition-all"
-              >
-                End Session
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Showdown / Round End Overlay removed per user request */}
     </div>
   );
 };

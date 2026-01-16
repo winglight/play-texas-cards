@@ -154,6 +154,7 @@ export const evaluateHand = (holeCards: Card[], communityCards: Card[]): HandEva
 const getFlushSuit = (cards: Card[]): Suit | null => {
   const counts: Record<string, number> = {};
   for (const card of cards) {
+    if (!card || !card.suit) continue;
     counts[card.suit] = (counts[card.suit] || 0) + 1;
     if (counts[card.suit] >= 5) return card.suit;
   }
