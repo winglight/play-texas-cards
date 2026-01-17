@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { Table } from '../components/Table';
 import { useNavigate } from 'react-router-dom';
 import { GameState, Player, Card } from '../types/poker';
+import { logEvent, CATEGORY, ACTION } from '../utils/analytics';
 
 const API_URL = 'http://localhost:8000';
 const WS_URL = 'ws://localhost:8000';
@@ -28,12 +29,15 @@ export const MultiplayerPage: React.FC = () => {
 
   const handleCreateRoom = async () => {
     try {
+        logEvent(CATEGORY.GAME, 'Create Room', 'Attempt');
         const res = await fetch(`${API_URL}/api/rooms/create`, { method: 'POST' });
         const data = await res.json();
         setRoomId(data.room_id);
+        logEvent(CATEGORY.GAME, 'Create Room', 'Success');
         // Auto join
         await handleJoinRoom(data.room_id);
     } catch (e) {
+        logEvent(CATEGORY.GAME, 'Create Room', 'Failure');
         setError('Failed to create room');
     }
   };
@@ -49,13 +53,16 @@ export const MultiplayerPage: React.FC = () => {
     }
 
     try {
+        logEvent(CATEGORY.GAME, 'Join Room', 'Attempt');
         const res = await fetch(`${API_URL}/api/rooms/join?room_id=${rid}&username=${username}`, { method: 'POST' });
         if (!res.ok) throw new Error('Join failed');
         const data = await res.json();
         setPlayerId(data.player_id);
         connectWs(rid, data.player_id);
         setInRoom(true);
+        logEvent(CATEGORY.GAME, 'Join Room', 'Success');
     } catch (e) {
+        logEvent(CATEGORY.GAME, 'Join Room', 'Failure');
         setError('Failed to join room. Check ID.');
     }
   };
@@ -85,13 +92,25 @@ export const MultiplayerPage: React.FC = () => {
   };
 
   const startGame = () => {
+      logEvent(CATEGORY.GAME, ACTION.START_GAME, 'Multiplayer');
       socket?.send(JSON.stringify({ type: 'start' }));
+  };
+
+  const handleBack = () => {
+      logEvent(CATEGORY.NAVIGATION, 'Click Back', 'From Multiplayer Lobby');
+      navigate('/');
   };
 
   if (!inRoom) {
       return (
         <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
             <div className="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md">
+                <button 
+                  onClick={handleBack}
+                  className="mb-4 text-gray-400 hover:text-white"
+                >
+                  ← Back
+                </button>
                 <h2 className="text-3xl font-bold mb-6 text-center text-yellow-500">Multiplayer Lobby</h2>
                 
                 {error && <div className="bg-red-600 p-2 rounded mb-4 text-center">{error}</div>}
@@ -139,7 +158,7 @@ export const MultiplayerPage: React.FC = () => {
                     </button>
                     
                     <button 
-                        onClick={() => navigate('/')}
+                        onClick={handleBack}
                         className="w-full text-gray-400 hover:text-white mt-4"
                     >
                         Back to Home
@@ -153,7 +172,7 @@ export const MultiplayerPage: React.FC = () => {
   return (
     <div className="relative w-full h-screen bg-gray-900">
        <button 
-        onClick={() => navigate('/')}
+        onClick={handleBack}
         className="absolute top-4 left-4 z-50 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
       >
         Exit

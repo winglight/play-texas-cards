@@ -1,14 +1,21 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/gameStore';
+import { logEvent, CATEGORY, ACTION } from '../utils/analytics';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { resetGame } = useGameStore();
 
   const handleStartSinglePlayer = () => {
+    logEvent(CATEGORY.NAVIGATION, ACTION.START_GAME, 'Single Player');
     resetGame();
     navigate('/single-player');
+  };
+
+  const handleStartMultiplayer = () => {
+    logEvent(CATEGORY.NAVIGATION, ACTION.START_GAME, 'Multiplayer');
+    navigate('/multiplayer');
   };
 
   return (
@@ -35,7 +42,7 @@ export const Home: React.FC = () => {
 
         {/* Multiplayer Card */}
         <div 
-          onClick={() => navigate('/multiplayer')}
+          onClick={handleStartMultiplayer}
           className="bg-blue-900 rounded-xl p-8 cursor-pointer transform transition-all hover:scale-105 hover:bg-blue-800 shadow-2xl border-4 border-transparent hover:border-yellow-400 group"
         >
           <div className="text-4xl mb-4">🌍</div>

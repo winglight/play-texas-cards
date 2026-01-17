@@ -5,6 +5,8 @@ import { ProbabilityCalculator } from '../components/ProbabilityCalculator';
 import { GameSettings } from '../components/GameSettings';
 import { useNavigate } from 'react-router-dom';
 import { getAiAction } from '../utils/ai';
+import { logEvent, CATEGORY, ACTION } from '../utils/analytics';
+import { GameSettings as GameSettingsType } from '../types/poker';
 
 export const SinglePlayerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +21,16 @@ export const SinglePlayerPage: React.FC = () => {
     winners,
     settings,
   } = gameState;
+
+  const handleStartGame = (settings: GameSettingsType) => {
+    logEvent(CATEGORY.GAME, ACTION.START_GAME, `Type: ${settings.tableType}, Chips: ${settings.startingChips}`);
+    initGame(settings);
+  };
+
+  const handleBack = () => {
+    logEvent(CATEGORY.NAVIGATION, 'Click Back', 'From Single Player Settings');
+    navigate('/');
+  };
 
   const user = players[0];
   const activeOpponents = players.filter(p => p.isActive && p.id !== user?.id).length;
@@ -61,12 +73,12 @@ export const SinglePlayerPage: React.FC = () => {
           <div className="relative w-full h-screen bg-gray-900">
                {/* Back Button */}
               <button 
-                onClick={() => navigate('/')}
+                onClick={handleBack}
                 className="absolute top-4 left-4 z-50 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
               >
                 Back
               </button>
-              <GameSettings onStart={initGame} />
+              <GameSettings onStart={handleStartGame} />
           </div>
       );
   }
