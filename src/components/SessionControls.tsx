@@ -41,7 +41,7 @@ export const SessionControls: React.FC = () => {
             >
                 {filteredSessions.map(s => (
                     <option key={s.id} value={s.id}>
-                        {new Date(s.startTime).toLocaleTimeString()} ({s.hands.length}) - {s.playerCount || 6}/{s.totalSeats || (s.playerCount === 9 ? 9 : 6)}
+                        {new Date(s.startTime).toLocaleTimeString()} ({s.hands.length})
                     </option>
                 ))}
             </select>

@@ -573,7 +573,7 @@ export const useGameStore = create<GameStore>()(
                 // set({ players: newPlayers, pot: 0, ... })
                 // It records history but maybe doesn't use the full Showdown logic because there are no cards to evaluate.
                 // So I will leave this "Fold Winner" block ALONE.
-                [], // No community cards needed for fold winner? 
+                communityCards, 
                 newHistory,
                 currentSessionId,
                 sessions,
