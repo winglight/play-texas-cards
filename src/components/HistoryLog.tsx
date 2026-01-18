@@ -37,7 +37,8 @@ export const HistoryLog: React.FC<{ className?: string; style?: React.CSSPropert
 
   // Determine what to show
   let displayHistory = currentHandHistory;
-  let isReplayMode = replayState.isActive && replayState.handId;
+  const isReplayMode = replayState.isActive && replayState.handId;
+  let displayWinners: typeof winners = [];
 
   if (isReplayMode) {
       const session = sessions[currentSessionId];
@@ -45,7 +46,14 @@ export const HistoryLog: React.FC<{ className?: string; style?: React.CSSPropert
       if (hand && hand.history) {
           // Slice history up to current step
           displayHistory = hand.history.slice(0, replayState.currentStep + 1);
+          
+          // Check if we are at the end of the replay
+          if (replayState.currentStep >= hand.history.length - 1) {
+              displayWinners = hand.winners || [];
+          }
       }
+  } else {
+      displayWinners = winners;
   }
 
   return (
@@ -113,9 +121,11 @@ export const HistoryLog: React.FC<{ className?: string; style?: React.CSSPropert
         ))}
         
         {/* Show Winners if round ended (only in live mode or if replay reached end) */}
-        {(!isReplayMode && winners.length > 0) && (
+        {displayWinners.length > 0 && (
             <div className="mt-2 pt-2 border-t border-yellow-600">
-                {winners.map((w, i) => {
+                {displayWinners.map((w, i) => {
+                    // Try to find player in current state, or fallback to ID
+                    // In Replay Mode, players might be different, but for now we just show what we can.
                     const player = useGameStore.getState().players.find(p => p.id === w.playerId);
                     return (
                         <div key={i} className="text-yellow-400 font-bold">

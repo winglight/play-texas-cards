@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useNavigate } from 'react-router-dom';
+import clsx from 'clsx';
 
 export const SessionControls: React.FC = () => {
   const navigate = useNavigate();
   const { sessions, currentSessionId, loadSession, resetGame } = useGameStore();
   const [filterDate, setFilterDate] = useState<string>(''); // YYYY-MM-DD
+  const [sessionEnded, setSessionEnded] = useState(false);
 
   const sortedSessions = useMemo(() => {
       return Object.values(sessions).sort((a, b) => b.startTime - a.startTime);
@@ -21,8 +23,12 @@ export const SessionControls: React.FC = () => {
   }, [sortedSessions, filterDate]);
 
   const handleEndSession = () => {
-      resetGame();
-      navigate('/');
+      if (!sessionEnded) {
+          setSessionEnded(true);
+      } else {
+          resetGame();
+          navigate('/');
+      }
   };
 
   return (
@@ -37,7 +43,10 @@ export const SessionControls: React.FC = () => {
             <select 
                 className="bg-gray-700 text-white text-xs p-1 rounded border border-gray-600 w-40"
                 value={currentSessionId}
-                onChange={(e) => loadSession(e.target.value)}
+                onChange={(e) => {
+                    loadSession(e.target.value);
+                    setSessionEnded(false);
+                }}
             >
                 {filteredSessions.map(s => (
                     <option key={s.id} value={s.id}>
@@ -48,9 +57,14 @@ export const SessionControls: React.FC = () => {
         </div>
         <button 
           onClick={handleEndSession}
-          className="bg-red-800 text-white px-2 py-1 rounded hover:bg-red-700 text-xs font-bold border border-red-900 shadow-lg h-[26px] whitespace-nowrap"
+          className={clsx(
+              "text-white px-2 py-1 rounded text-xs font-bold border shadow-lg h-[26px] whitespace-nowrap transition-colors",
+              sessionEnded 
+                ? "bg-blue-600 border-blue-700 hover:bg-blue-500" 
+                : "bg-red-800 border-red-900 hover:bg-red-700"
+          )}
         >
-          End Session
+          {sessionEnded ? "New Session" : "End Session"}
         </button>
     </div>
   );
