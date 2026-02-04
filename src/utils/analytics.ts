@@ -5,23 +5,15 @@ import ReactGA from "react-ga4";
 export const GA_MEASUREMENT_ID = "G-YR31JHB2JT";
 
 export const initGA = () => {
-  if (GA_MEASUREMENT_ID === "G-REPLACE_ME") {
-    console.warn(
-      "Google Analytics Measurement ID is not set. Analytics will not work."
-    );
-    return;
-  }
   ReactGA.initialize(GA_MEASUREMENT_ID);
 };
 
 export const logPageView = () => {
-  if (GA_MEASUREMENT_ID === "G-REPLACE_ME") return;
   
   ReactGA.send({ hitType: "pageview", page: window.location.pathname + window.location.search });
 };
 
 export const logEvent = (category: string, action: string, label?: string) => {
-  if (GA_MEASUREMENT_ID === "G-REPLACE_ME") return;
 
   ReactGA.event({
     category,
