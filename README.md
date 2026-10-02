@@ -27,6 +27,7 @@ Experience the game here: [https://holdem.broyustudio.com/](https://holdem.broyu
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Run development server: `npm run dev`
+4. Deployment: `npm run deploy`
 
 ## Languages
 
