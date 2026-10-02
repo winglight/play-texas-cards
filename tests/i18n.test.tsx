@@ -10,6 +10,7 @@ import { GameSettings } from '../src/components/GameSettings';
 import { TutorialModal } from '../src/components/TutorialModal';
 import { Controls } from '../src/components/Controls';
 import { Table } from '../src/components/Table';
+import { Player } from '../src/components/Player';
 import { SessionStats } from '../src/components/SessionStats';
 import { ProbabilityCalculator } from '../src/components/ProbabilityCalculator';
 import { MultiplayerPage } from '../src/pages/MultiplayerPage';
@@ -140,4 +141,20 @@ test('probability effect and current hand retranslate while numeric results stay
   await act(async()=>{await new Promise(resolve=>setTimeout(resolve,30));});assert.match(visible(root),/100\.0/);assert.match(visible(root),/Royal Flush/);
   language(root,'zh');assert.match(visible(root),/皇家同花顺/);assert.match(visible(root),/100\.0/);assert.match(visible(root),/平局率/);
   assert.ok(['check','call','raise','fold','all-in'].includes(getAiAction(state().players[1],state()).action));close(root);
+});
+
+
+test('seat labels keep Chinese and English text and seat numbers on one line',()=>{
+  state().initGame(settings);
+  for(const locale of ['en','zh'] as const){
+    setLocale(locale);
+    for(const order of [1,4,9]){
+      const root=mount(<Player player={state().players[0]} isCurrentUser isCurrentTurn={false} isDealer={false} playOrder={order}/>);
+      const label=root.root.findAllByType('span').find(span=>nodeText(span)===`${locale==='zh'?'座位：':'Seat:'}${order}`);
+      assert.ok(label,'Seat label and number must remain in one element');
+      assert.ok(label.props.className.split(/\s+/).includes('whitespace-nowrap'),'Prevent CJK line breaking before the seat number');
+      assert.ok(label.parent?.props.className.split(/\s+/).includes('w-max'),'Keep the absolutely positioned label at its intrinsic width');
+      close(root);
+    }
+  }
 });
