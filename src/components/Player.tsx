@@ -82,8 +82,8 @@ export const Player: React.FC<PlayerProps> = ({
 
       {/* Seat Order Info */}
       {playOrder !== undefined && (
-         <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-20">
-            <span className="text-[10px] text-white bg-black/70 px-1.5 py-0.5 rounded font-mono shadow-sm border border-white/20">
+         <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-20 w-max">
+            <span className="text-[10px] text-white bg-black/70 px-1.5 py-0.5 rounded font-mono shadow-sm border border-white/20 whitespace-nowrap">
                 {t("Seat:")}{playOrder}
             </span>
          </div>
