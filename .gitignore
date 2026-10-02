@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 .trae
+# Generated test output
+.test-build/

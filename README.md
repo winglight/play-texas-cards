@@ -27,3 +27,11 @@ Experience the game here: [https://holdem.broyustudio.com/](https://holdem.broyu
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Run development server: `npm run dev`
+
+## Languages
+
+Use the **中文 / English** buttons to switch between Simplified Chinese and English on any page. Your language preference is saved locally under `texas-holdem-language`; existing game/session storage is unchanged. Switching languages preserves the active hand, form input, open guide, history panel and replay position.
+
+Poker terms, tutorial content, probability labels, hand histories, replay controls, multiplayer forms and validation messages are translated. Multiplayer usernames are kept exactly as entered. Card ranks, suit symbols, standard poker abbreviations, and the table wordmark are unchanged.
+
+Run `npm run test:i18n` for translation/placeholder coverage, preference reload, state-preserving component tests, mocked multiplayer protocol regression, real-engine hand/replay checks and probability-panel translation. These Node-based tests do not open a browser or contact a game server. Existing `npm run check`, `npm run build`, and `npm run lint` scripts remain available.

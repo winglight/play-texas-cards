@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Player } from './Player';
@@ -24,6 +25,7 @@ const PLAYER_POSITIONS = [
 ];
 
 export const Table: React.FC = () => {
+  const { t } = useI18n();
   const { 
     players, 
     communityCards, 
@@ -90,7 +92,7 @@ export const Table: React.FC = () => {
   const userIndex = 0; // Assuming user is always index 0 for now
   const user = displayPlayers[userIndex];
   
-  if (!user) return <div className="flex items-center justify-center h-screen text-white">Loading Table...</div>;
+  if (!user) return <div className="flex items-center justify-center h-screen text-white">{t("Loading Table...")}</div>;
 
   // Need to call amount calculation
   const toCall = currentBet - user.currentBet;
@@ -107,7 +109,7 @@ export const Table: React.FC = () => {
       {/* Replay Indicator */}
       {isReplay && (
           <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg z-50 animate-pulse border-2 border-red-400">
-              REPLAY MODE - Step {replayState.currentStep + 1}
+              {t("REPLAY MODE - Step")} {replayState.currentStep + 1}
           </div>
       )}
 
@@ -115,10 +117,10 @@ export const Table: React.FC = () => {
       <button 
         onClick={() => setShowInfoPanel(!showInfoPanel)}
         className="absolute top-[60px] right-4 z-50 bg-gray-800 text-white p-2 rounded border border-gray-600 hover:bg-gray-700 shadow-lg flex items-center gap-2"
-        title="Toggle Info Panel"
+        title={t("Toggle Info Panel")}
       >
         {showInfoPanel ? <X size={20} /> : <List size={20} />}
-        <span className="text-xs font-bold hidden md:inline">INFO</span>
+        <span className="text-xs font-bold hidden md:inline">{t("INFO")}</span>
       </button>
 
       {/* Info Panel Overlay */}
@@ -144,8 +146,8 @@ export const Table: React.FC = () => {
         <div className="flex gap-2 mb-8 z-10 min-h-[96px] items-center justify-center">
           {(displayStage === 'preflop' || displayCommunityCards.length === 0) ? (
               <div className="text-yellow-500/50 font-serif text-lg text-center border border-yellow-500/30 rounded px-4 py-2 bg-black/20 animate-pulse">
-                  <div className="font-bold tracking-widest">PRE-FLOP</div>
-                  <div className="text-sm text-yellow-500/70">Blinds: {smallBlind}/{bigBlind}</div>
+                  <div className="font-bold tracking-widest">{t("PRE-FLOP")}</div>
+                  <div className="text-sm text-yellow-500/70">{t("Blinds:")} {smallBlind}/{bigBlind}</div>
               </div>
           ) : (
             displayCommunityCards.map((card, i) => (
@@ -155,8 +157,7 @@ export const Table: React.FC = () => {
         </div>
 
         {/* Pot */}
-        <div className="bg-black bg-opacity-40 px-6 py-2 rounded-full text-white font-mono text-xl border border-yellow-500 shadow-inner z-10">
-          Pot: <span className="text-yellow-400">${displayPot}</span>
+        <div className="bg-black bg-opacity-40 px-6 py-2 rounded-full text-white font-mono text-xl border border-yellow-500 shadow-inner z-10">{t("Pot:")} {' '}<span className="text-yellow-400">${displayPot}</span>
         </div>
       </div>
 
@@ -205,9 +206,7 @@ export const Table: React.FC = () => {
              <button 
                 onClick={startNewHand}
                 className="px-8 py-3 bg-blue-600 text-white text-xl font-bold rounded-lg hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
-             >
-                Next Hand
-             </button>
+             >{t("Next Hand")}</button>
         </div>
       )}
     </div>

@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState, useEffect } from 'react';
 import { PlayerActionType } from '../types/poker';
 
@@ -20,6 +21,7 @@ export const Controls: React.FC<ControlsProps> = ({
   bigBlind,
   maxRaiseToCap
 }) => {
+  const { t } = useI18n();
   // Slider value represents the total ADDITIONAL amount to put in? 
   // Or the total bet amount?
   // Let's make slider represent the RAISE TO amount (Total bet in this round)
@@ -56,6 +58,7 @@ export const Controls: React.FC<ControlsProps> = ({
           <span className="text-sm font-mono">${minRaiseTo}</span>
           <input
             type="range"
+            aria-label={t("Raise amount")}
             min={minRaiseTo}
             max={maxRaiseTo}
             step={bigBlind} // Step by BB
@@ -73,23 +76,19 @@ export const Controls: React.FC<ControlsProps> = ({
         <button
           onClick={() => onAction('fold')}
           className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 font-bold shadow-lg transition-colors text-sm"
-        >
-          Fold
-        </button>
+        >{t("Fold")}</button>
 
         {canCheck ? (
           <button
             onClick={() => onAction('check')}
             className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 font-bold shadow-lg transition-colors text-sm"
-          >
-            Check
-          </button>
+          >{t("Check")}</button>
         ) : (
           <button
             onClick={() => onAction('call')}
             className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 font-bold shadow-lg transition-colors flex items-center gap-1 text-sm"
           >
-            <span>Call</span>
+            <span>{t("Call")}</span>
             <span className="opacity-80">${toCall}</span>
           </button>
         )}
@@ -99,7 +98,7 @@ export const Controls: React.FC<ControlsProps> = ({
             onClick={handleRaise}
             className="px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-700 font-bold shadow-lg transition-colors flex items-center gap-1 text-sm"
           >
-            <span>Raise to</span>
+            <span>{t("Raise to")}</span>
             <span className="opacity-80">${raiseAmount}</span>
           </button>
         )}
@@ -107,9 +106,7 @@ export const Controls: React.FC<ControlsProps> = ({
         <button
             onClick={handleAllIn}
             className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 font-bold shadow-lg transition-colors text-sm"
-        >
-            All In
-        </button>
+        >{t("All In")}</button>
       </div>
     </div>
   );

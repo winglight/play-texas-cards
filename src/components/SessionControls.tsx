@@ -1,9 +1,11 @@
+import { useI18n } from '../i18n';
 import React, { useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 
 export const SessionControls: React.FC = () => {
+  const { t, formatTime } = useI18n();
   const navigate = useNavigate();
   const { sessions, currentSessionId, loadSession, resetGame } = useGameStore();
   const [filterDate, setFilterDate] = useState<string>(''); // YYYY-MM-DD
@@ -35,12 +37,13 @@ export const SessionControls: React.FC = () => {
     <div className="absolute top-4 right-4 flex items-center gap-2 z-50 pointer-events-auto">
         <div className="bg-gray-800 rounded p-1 flex items-center gap-2 border border-gray-600 shadow-lg">
             <input 
-                type="date" 
+                type="date"
+                aria-label={t("Session date")} 
                 className="bg-gray-700 text-white text-xs p-1 rounded border border-gray-600"
                 value={filterDate}
                 onChange={(e) => setFilterDate(e.target.value)}
             />
-            <select 
+            <select aria-label={t("Select session")} 
                 className="bg-gray-700 text-white text-xs p-1 rounded border border-gray-600 w-40"
                 value={currentSessionId}
                 onChange={(e) => {
@@ -50,7 +53,7 @@ export const SessionControls: React.FC = () => {
             >
                 {filteredSessions.map(s => (
                     <option key={s.id} value={s.id}>
-                        {new Date(s.startTime).toLocaleTimeString()} ({s.hands.length})
+                        {formatTime(s.startTime)} ({s.hands.length})
                     </option>
                 ))}
             </select>
@@ -64,7 +67,7 @@ export const SessionControls: React.FC = () => {
                 : "bg-red-800 border-red-900 hover:bg-red-700"
           )}
         >
-          {sessionEnded ? "New Session" : "End Session"}
+          {t(sessionEnded ? "New Session" : "End Session")}
         </button>
     </div>
   );

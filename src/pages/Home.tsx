@@ -1,9 +1,11 @@
+import { useI18n } from '../i18n';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/gameStore';
 import { logEvent, CATEGORY, ACTION } from '../utils/analytics';
 
 export const Home: React.FC = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { resetGame } = useGameStore();
 
@@ -31,13 +33,9 @@ export const Home: React.FC = () => {
           className="bg-green-800 rounded-xl p-8 cursor-pointer transform transition-all hover:scale-105 hover:bg-green-700 shadow-2xl border-4 border-transparent hover:border-yellow-400 group"
         >
           <div className="text-4xl mb-4">🃏</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Single Player</h2>
-          <p className="text-green-200">
-            Practice against AI bots. Perfect your strategy with real-time probability analysis.
-          </p>
-          <div className="mt-6 flex items-center text-yellow-400 font-bold group-hover:translate-x-2 transition-transform">
-            Start Game →
-          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">{t("Single Player")}</h2>
+          <p className="text-green-200">{t("Practice against AI bots. Perfect your strategy with real-time probability analysis.")}</p>
+          <div className="mt-6 flex items-center text-yellow-400 font-bold group-hover:translate-x-2 transition-transform">{t("Start Game \u2192")}</div>
         </div>
 
         {/* Multiplayer Card */}
@@ -46,13 +44,9 @@ export const Home: React.FC = () => {
           className="bg-blue-900 rounded-xl p-8 cursor-pointer transform transition-all hover:scale-105 hover:bg-blue-800 shadow-2xl border-4 border-transparent hover:border-yellow-400 group"
         >
           <div className="text-4xl mb-4">🌍</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Multiplayer</h2>
-          <p className="text-blue-200">
-            Create rooms and play with friends online.
-          </p>
-          <div className="mt-6 flex items-center text-yellow-400 font-bold group-hover:translate-x-2 transition-transform">
-            Join Room →
-          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">{t("Multiplayer")}</h2>
+          <p className="text-blue-200">{t("Create rooms and play with friends online.")}</p>
+          <div className="mt-6 flex items-center text-yellow-400 font-bold group-hover:translate-x-2 transition-transform">{t("Join Room \u2192")}</div>
         </div>
       </div>
     </div>

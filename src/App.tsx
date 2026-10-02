@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { Home } from './pages/Home';
 import { SinglePlayerPage } from './pages/SinglePlayerPage';
 import { MultiplayerPage } from './pages/MultiplayerPage';
@@ -15,6 +16,7 @@ function App() {
   return (
     <Router>
       <AnalyticsTracker />
+      <LanguageSwitcher />
       <GithubLink />
       <Routes>
         <Route path="/" element={<Home />} />

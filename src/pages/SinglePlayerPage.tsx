@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Table } from '../components/Table';
@@ -9,6 +10,7 @@ import { logEvent, CATEGORY, ACTION } from '../utils/analytics';
 import { GameSettings as GameSettingsType } from '../types/poker';
 
 export const SinglePlayerPage: React.FC = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const gameState = useGameStore();
   const { 
@@ -75,9 +77,7 @@ export const SinglePlayerPage: React.FC = () => {
               <button 
                 onClick={handleBack}
                 className="absolute top-4 left-4 z-50 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
-              >
-                Back
-              </button>
+              >{t("Back")}</button>
               <GameSettings onStart={handleStartGame} />
           </div>
       );

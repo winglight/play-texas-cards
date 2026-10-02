@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useEffect, useState } from 'react';
 import { Card, HandEvaluation } from '../types/poker';
 import { calculateEquity } from '../utils/probability';
@@ -14,6 +15,7 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({
   communityCards,
   activeOpponentsCount,
 }) => {
+  const { t } = useI18n();
   const [equity, setEquity] = useState({ winRate: 0, tieRate: 0 });
   const [currentHand, setCurrentHand] = useState<HandEvaluation | null>(null);
 
@@ -38,22 +40,22 @@ export const ProbabilityCalculator: React.FC<ProbabilityCalculatorProps> = ({
 
   return (
     <div className="absolute bottom-[140px] right-4 bg-black bg-opacity-70 p-4 rounded-lg text-white text-sm border border-gray-600 shadow-xl pointer-events-none z-40">
-      <h3 className="font-bold text-gray-300 mb-2 uppercase text-xs tracking-wider">Probability</h3>
+      <h3 className="font-bold text-gray-300 mb-2 uppercase text-xs tracking-wider">{t("Probability")}</h3>
       
       <div className="space-y-2">
         <div className="flex justify-between">
-          <span>Win Rate:</span>
+          <span>{t("Win Rate:")}</span>
           <span className="font-mono font-bold text-green-400">{equity.winRate.toFixed(1)}%</span>
         </div>
         <div className="flex justify-between">
-          <span>Tie Rate:</span>
+          <span>{t("Tie Rate:")}</span>
           <span className="font-mono font-bold text-blue-400">{equity.tieRate.toFixed(1)}%</span>
         </div>
       </div>
 
       <div className="mt-4 pt-2 border-t border-gray-600">
-        <div className="text-xs text-gray-400 mb-1">Current Hand</div>
-        <div className="font-bold text-yellow-500">{currentHand?.name}</div>
+        <div className="text-xs text-gray-400 mb-1">{t("Current Hand")}</div>
+        <div className="font-bold text-yellow-500">{t(currentHand?.name)}</div>
       </div>
     </div>
   );

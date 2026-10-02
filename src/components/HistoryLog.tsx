@@ -1,10 +1,13 @@
+import { useI18n } from '../i18n';
 import React, { useEffect, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import clsx from 'clsx';
 import { Play, Pause, SkipBack, SkipForward, Square } from 'lucide-react';
 
 export const HistoryLog: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ className, style }) => {
+  const { t, formatTime, playerName } = useI18n();
   const { 
+      mode,
       currentHandHistory, 
       winners, 
       replayState,
@@ -62,20 +65,20 @@ export const HistoryLog: React.FC<{ className?: string; style?: React.CSSPropert
       style={style}
     >
       <div className="bg-gray-800 px-3 py-1 text-xs font-bold text-gray-300 border-b border-gray-600 flex justify-between items-center">
-        <span>{isReplayMode ? 'REPLAY MODE' : 'HAND HISTORY'}</span>
+        <span>{t(isReplayMode ? 'REPLAY MODE' : 'HAND HISTORY')}</span>
         
         {isReplayMode && (
             <div className="flex items-center space-x-1">
-                <button onClick={prevReplayStep} className="p-0.5 hover:text-white" title="Previous Step">
+                <button onClick={prevReplayStep} className="p-0.5 hover:text-white" title={t("Previous Step")}>
                     <SkipBack size={12} />
                 </button>
-                <button onClick={toggleReplay} className="p-0.5 hover:text-white" title={replayState.isPlaying ? "Pause" : "Play"}>
+                <button onClick={toggleReplay} className="p-0.5 hover:text-white" title={t(replayState.isPlaying ? "Pause" : "Play")}>
                     {replayState.isPlaying ? <Pause size={12} /> : <Play size={12} />}
                 </button>
-                <button onClick={stopReplay} className="p-0.5 hover:text-red-400" title="Stop Replay">
+                <button onClick={stopReplay} className="p-0.5 hover:text-red-400" title={t("Stop Replay")}>
                     <Square size={12} />
                 </button>
-                <button onClick={nextReplayStep} className="p-0.5 hover:text-white" title="Next Step">
+                <button onClick={nextReplayStep} className="p-0.5 hover:text-white" title={t("Next Step")}>
                     <SkipForward size={12} />
                 </button>
             </div>
@@ -89,10 +92,10 @@ export const HistoryLog: React.FC<{ className?: string; style?: React.CSSPropert
           <div key={idx} className="flex flex-col border-b border-gray-700 pb-1 mb-1 last:border-0">
             <div className="flex justify-between items-baseline">
               <span className="text-blue-400 font-bold truncate max-w-[80px]">
-                {entry.playerName}
+                {playerName(entry.playerName, mode === 'single')}
               </span>
               <span className="text-gray-400 text-[10px]">
-                {new Date(entry.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                {formatTime(entry.timestamp, { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             </div>
             <div className="flex justify-between">
@@ -104,7 +107,7 @@ export const HistoryLog: React.FC<{ className?: string; style?: React.CSSPropert
                    entry.action === 'RAISE' && "text-red-400",
                    entry.action === 'ALL-IN' && "text-red-600 animate-pulse",
                )}>
-                   {entry.action}
+                   {t(entry.action)}
                </span>
                {entry.amount && (
                    <span className="text-red-300">
@@ -114,7 +117,7 @@ export const HistoryLog: React.FC<{ className?: string; style?: React.CSSPropert
             </div>
             {entry.winRate !== undefined && (
                 <div className="text-[10px] text-green-300/70 italic">
-                    Win Rate: {entry.winRate.toFixed(1)}%
+                    {t("Win Rate:")} {entry.winRate.toFixed(1)}%
                 </div>
             )}
           </div>
@@ -129,8 +132,8 @@ export const HistoryLog: React.FC<{ className?: string; style?: React.CSSPropert
                     const player = useGameStore.getState().players.find(p => p.id === w.playerId);
                     return (
                         <div key={i} className="text-yellow-400 font-bold">
-                            🏆 {player?.name || w.playerId} won <span className="text-green-400">+${w.amount}</span>
-                            {w.hand && <div className="text-[10px] text-gray-300 font-normal">{w.hand.name}</div>}
+                            🏆 {playerName(player?.name || w.playerId, mode === 'single')} {t("won")} <span className="text-green-400">+${w.amount}</span>
+                            {w.hand && <div className="text-[10px] text-gray-300 font-normal">{t(w.hand.name)}</div>}
                         </div>
                     );
                 })}

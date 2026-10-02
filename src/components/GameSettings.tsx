@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState } from 'react';
 import { GameSettings as GameSettingsType, TableType } from '../types/poker';
 
@@ -6,6 +7,7 @@ interface GameSettingsProps {
 }
 
 export const GameSettings: React.FC<GameSettingsProps> = ({ onStart }) => {
+  const { t } = useI18n();
   const [tableType, setTableType] = useState<TableType>('nl');
   const [playerCount, setPlayerCount] = useState<6 | 9>(6);
   const [bigBlind, setBigBlind] = useState<number>(20);
@@ -37,12 +39,12 @@ export const GameSettings: React.FC<GameSettingsProps> = ({ onStart }) => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-green-900 font-sans">
       <div className="bg-[#1a2e1a] p-8 rounded-xl shadow-2xl border-2 border-yellow-600 w-full max-w-md">
-        <h2 className="text-3xl font-bold text-yellow-500 mb-6 text-center font-serif tracking-wide">Table Settings</h2>
+        <h2 className="text-3xl font-bold text-yellow-500 mb-6 text-center font-serif tracking-wide">{t("Table Settings")}</h2>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Table Type */}
           <div className="space-y-2">
-            <label className="block text-gray-300 font-semibold">Table Type</label>
+            <label className="block text-gray-300 font-semibold">{t("Table Type")}</label>
             <div className="grid grid-cols-3 gap-2">
               {(['nl', 'pl', 'fl'] as const).map((type) => (
                 <button
@@ -55,7 +57,7 @@ export const GameSettings: React.FC<GameSettingsProps> = ({ onStart }) => {
                       : 'bg-gray-800 text-gray-400 border-gray-600 hover:bg-gray-700'
                   }`}
                 >
-                  {type === 'nl' ? 'No-Limit' : type === 'pl' ? 'Pot-Limit' : 'Fixed'}
+                  {t(type === 'nl' ? 'No-Limit' : type === 'pl' ? 'Pot-Limit' : 'Fixed')}
                 </button>
               ))}
             </div>
@@ -63,7 +65,7 @@ export const GameSettings: React.FC<GameSettingsProps> = ({ onStart }) => {
 
           {/* Players */}
           <div className="space-y-2">
-            <label className="block text-gray-300 font-semibold">Players</label>
+            <label className="block text-gray-300 font-semibold">{t("Players")}</label>
             <div className="flex space-x-4">
               {[6, 9].map((count) => (
                 <button
@@ -76,7 +78,7 @@ export const GameSettings: React.FC<GameSettingsProps> = ({ onStart }) => {
                       : 'bg-gray-800 text-gray-400 border-gray-600 hover:bg-gray-700'
                   }`}
                 >
-                  {count}-Max
+                  {t(`${count}-Max`)}
                 </button>
               ))}
             </div>
@@ -84,11 +86,11 @@ export const GameSettings: React.FC<GameSettingsProps> = ({ onStart }) => {
 
           {/* Big Blind */}
           <div className="space-y-2">
-            <label className="block text-gray-300 font-semibold">
-              Big Blind Amount: <span className="text-yellow-400">${bigBlind}</span>
+            <label className="block text-gray-300 font-semibold">{t("Big Blind Amount:")} {' '}<span className="text-yellow-400">${bigBlind}</span>
             </label>
             <input
               type="range"
+              aria-label={t("Big Blind Amount:")}
               min="2"
               max="100"
               step="2"
@@ -104,11 +106,11 @@ export const GameSettings: React.FC<GameSettingsProps> = ({ onStart }) => {
 
           {/* Max Buy-in (BBs) */}
           <div className="space-y-2">
-            <label className="block text-gray-300 font-semibold">
-              Max Buy-in (BBs): <span className="text-yellow-400">{maxBuyInBB}BB</span>
+            <label className="block text-gray-300 font-semibold">{t("Max Buy-in (BBs):")} {' '}<span className="text-yellow-400">{maxBuyInBB}BB</span>
             </label>
             <input
               type="range"
+              aria-label={t("Max Buy-in (BBs):")}
               min="50"
               max="200"
               step="10"
@@ -125,11 +127,11 @@ export const GameSettings: React.FC<GameSettingsProps> = ({ onStart }) => {
           {/* Summary */}
           <div className="bg-black/40 p-4 rounded-lg border border-gray-700 space-y-2">
              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Small Blind:</span>
+                <span className="text-gray-400">{t("Small Blind:")}</span>
                 <span className="text-white font-mono">${bigBlind / 2}</span>
              </div>
              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Starting Chips:</span>
+                <span className="text-gray-400">{t("Starting Chips:")}</span>
                 <span className="text-yellow-400 font-mono font-bold">${startingChips}</span>
              </div>
           </div>
@@ -137,9 +139,7 @@ export const GameSettings: React.FC<GameSettingsProps> = ({ onStart }) => {
           <button
             type="submit"
             className="w-full py-4 bg-gradient-to-r from-yellow-600 to-yellow-500 text-black font-bold text-xl rounded-lg hover:from-yellow-500 hover:to-yellow-400 transform hover:scale-[1.02] transition-all shadow-lg"
-          >
-            Start Game
-          </button>
+          >{t("Start Game")}</button>
         </form>
       </div>
     </div>

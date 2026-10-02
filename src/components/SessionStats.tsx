@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import clsx from 'clsx';
@@ -5,7 +6,8 @@ import { PlayCircle } from 'lucide-react';
 import { Session } from '../types/poker';
 
 export const SessionStats: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ className, style }) => {
-  const { currentSessionId, sessions, players, startReplay, stage, winners } = useGameStore();
+  const { t, formatTime, playerName } = useI18n();
+  const { mode, currentSessionId, sessions, players, startReplay, stage, winners } = useGameStore();
   const [activeTab, setActiveTab] = useState<'hands' | 'leaderboard'>('hands');
   
   const session = sessions[currentSessionId];
@@ -55,21 +57,17 @@ export const SessionStats: React.FC<{ className?: string; style?: React.CSSPrope
            <button 
              className={clsx("flex-1 py-1 text-xs font-bold", activeTab === 'hands' ? "bg-gray-700 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700")}
              onClick={() => setActiveTab('hands')}
-           >
-               HANDS
-           </button>
+           >{t("HANDS")}</button>
            <button 
              className={clsx("flex-1 py-1 text-xs font-bold", activeTab === 'leaderboard' ? "bg-gray-700 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700")}
              onClick={() => setActiveTab('leaderboard')}
-           >
-               LEADERBOARD
-           </button>
+           >{t("LEADERBOARD")}</button>
        </div>
 
        <div className="flex-1 overflow-y-auto p-2 text-xs font-mono">
            {activeTab === 'hands' ? (
                <div className="space-y-2">
-                  {session.hands.length === 0 && <div className="text-gray-500 text-center mt-4">No hands played yet</div>}
+                  {session.hands.length === 0 && <div className="text-gray-500 text-center mt-4">{t("No hands played yet")}</div>}
                   {session.hands.slice().reverse().map((hand, idx) => {
                       const hasHistory = hand.history && hand.history.length > 0;
                       const isClickable = canReplay && hasHistory;
@@ -82,10 +80,10 @@ export const SessionStats: React.FC<{ className?: string; style?: React.CSSPrope
                             isClickable ? "hover:bg-gray-800 cursor-pointer group" : "opacity-70 cursor-not-allowed"
                         )}
                         onClick={() => isClickable && startReplay(hand.id)}
-                        title={!canReplay ? "Wait for round end to replay" : !hasHistory ? "No history available" : "Click to Replay"}
+                        title={t(!canReplay ? "Wait for round end to replay" : !hasHistory ? "No history available" : "Click to Replay")}
                       >
                           <div className="text-gray-400 mb-1 flex justify-between items-center">
-                              <span>Hand #{session.hands.length - idx} - {new Date(hand.timestamp).toLocaleTimeString()}</span>
+                              <span>{t("Hand #{number}", { number: session.hands.length - idx })} - {formatTime(hand.timestamp)}</span>
                               {isClickable && <PlayCircle size={14} className="opacity-0 group-hover:opacity-100 text-yellow-500" />}
                           </div>
                           <div className="space-y-0.5">
@@ -95,7 +93,7 @@ export const SessionStats: React.FC<{ className?: string; style?: React.CSSPrope
                                   const name = p ? p.name : pid;
                                   return (
                                       <div key={pid} className="flex justify-between">
-                                          <span className="text-gray-300 truncate w-24">{name}</span>
+                                          <span className="text-gray-300 truncate w-24">{playerName(name, mode === 'single')}</span>
                                           <span className={pnl >= 0 ? "text-green-400" : "text-red-400"}>
                                               {pnl > 0 ? '+' : ''}{pnl}
                                           </span>
@@ -109,12 +107,12 @@ export const SessionStats: React.FC<{ className?: string; style?: React.CSSPrope
               </div>
            ) : (
                <div className="space-y-1">
-                   {sortedPlayers.length === 0 && <div className="text-gray-500 text-center mt-4">No data</div>}
+                   {sortedPlayers.length === 0 && <div className="text-gray-500 text-center mt-4">{t("No data")}</div>}
                    {sortedPlayers.map((p, idx) => (
                        <div key={p.id} className="flex justify-between items-center border-b border-gray-700 pb-1 last:border-0">
                            <div className="flex items-center gap-2">
                                <span className="text-gray-500 w-4 text-right">{idx + 1}.</span>
-                               <span className="text-white font-bold truncate w-24">{p.name}</span>
+                               <span className="text-white font-bold truncate w-24">{playerName(p.name, mode === 'single')}</span>
                            </div>
                            <span className={clsx("font-bold", p.total >= 0 ? "text-green-400" : "text-red-400")}>
                                {p.total > 0 ? '+' : ''}{p.total}

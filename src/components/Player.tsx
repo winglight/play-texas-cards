@@ -1,3 +1,5 @@
+import { useGameStore } from '../store/gameStore';
+import { useI18n } from '../i18n';
 import React, { useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { Player as PlayerType } from '../types/poker';
@@ -32,6 +34,8 @@ export const Player: React.FC<PlayerProps> = ({
   playOrder,
   showCards = false 
 }) => {
+  const { t, playerName } = useI18n();
+  const mode = useGameStore(state => state.mode);
   const [showProfile, setShowProfile] = useState(false);
   const strategyInfo = getStrategyInfo(player.aiStrategy);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -71,7 +75,7 @@ export const Player: React.FC<PlayerProps> = ({
               roleLabel === 'BB' ? "bg-orange-600 text-white" :
               "bg-gray-600 text-white"
             )}>
-              {roleLabel}
+              {t(roleLabel)}
             </div>
           )}
       </div>
@@ -80,7 +84,7 @@ export const Player: React.FC<PlayerProps> = ({
       {playOrder !== undefined && (
          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-20">
             <span className="text-[10px] text-white bg-black/70 px-1.5 py-0.5 rounded font-mono shadow-sm border border-white/20">
-                Seat:{playOrder}
+                {t("Seat:")}{playOrder}
             </span>
          </div>
       )}
@@ -97,24 +101,22 @@ export const Player: React.FC<PlayerProps> = ({
                       {strategyInfo.label}
                   </div>
                   <div>
-                      <div className="font-bold text-lg leading-tight">{player.name}</div>
-                      <div className="text-xs text-gray-500 font-medium">{strategyInfo.name}</div>
+                      <div className="font-bold text-lg leading-tight">{playerName(player.name, mode === 'single')}</div>
+                      <div className="text-xs text-gray-500 font-medium">{t(strategyInfo.name)}</div>
                   </div>
               </div>
               <p className="text-xs text-gray-700 leading-relaxed border-t border-gray-100 pt-2 mt-1">
-                  {strategyInfo.desc}
+                  {t(strategyInfo.desc)}
               </p>
               <div className="mt-3 pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500 font-mono">
-                  <span>Chips: ${player.chips}</span>
+                  <span>{t("Chips:")} ${player.chips}</span>
                   <button 
                     onClick={(e) => {
                         e.stopPropagation();
                         setShowProfile(false);
                     }}
                     className="text-blue-600 hover:text-blue-800 font-bold"
-                  >
-                      CLOSE
-                  </button>
+                  >{t("CLOSE")}</button>
               </div>
               
               {/* Arrow */}
@@ -167,7 +169,7 @@ export const Player: React.FC<PlayerProps> = ({
             </div>
         )}
 
-        <div className="text-sm font-bold truncate max-w-[90%] pointer-events-none">{player.name}</div>
+        <div className="text-sm font-bold truncate max-w-[90%] pointer-events-none">{playerName(player.name, mode === 'single')}</div>
         <div className="text-xs text-yellow-300 pointer-events-none">
             ${player.chips}
         </div>
@@ -183,7 +185,7 @@ export const Player: React.FC<PlayerProps> = ({
             ((player.action || player.lastAction)?.toLowerCase() === 'all-in') ? "bg-red-800 animate-pulse" :
             "bg-blue-600"
           )}>
-            {(player.action || player.lastAction)}
+            {t(player.action || player.lastAction)}
           </div>
         )}
       </div>

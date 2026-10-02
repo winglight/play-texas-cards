@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Table } from '../components/Table';
@@ -9,6 +10,7 @@ const API_URL = 'http://localhost:8000';
 const WS_URL = 'ws://localhost:8000';
 
 export const MultiplayerPage: React.FC = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { setMode, updateState, setSocket, socket, players, stage } = useGameStore();
   
@@ -108,61 +110,55 @@ export const MultiplayerPage: React.FC = () => {
                 <button 
                   onClick={handleBack}
                   className="mb-4 text-gray-400 hover:text-white"
-                >
-                  ← Back
-                </button>
-                <h2 className="text-3xl font-bold mb-6 text-center text-yellow-500">Multiplayer Lobby</h2>
+                >{t("\u2190 Back")}</button>
+                <h2 className="text-3xl font-bold mb-6 text-center text-yellow-500">{t("Multiplayer Lobby")}</h2>
                 
-                {error && <div className="bg-red-600 p-2 rounded mb-4 text-center">{error}</div>}
+                {error && <div className="bg-red-600 p-2 rounded mb-4 text-center">{t(error)}</div>}
 
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm text-gray-400 mb-1">Username</label>
+                        <label className="block text-sm text-gray-400 mb-1">{t("Username")}</label>
                         <input 
                             value={username}
                             onChange={e => setUsername(e.target.value)}
                             className="w-full bg-gray-700 p-3 rounded text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                            placeholder="Enter your name"
+                            placeholder={t("Enter your name")}
+                            aria-label={t("Username")}
                         />
                     </div>
 
                     <div className="flex gap-4 items-end">
                          <div className="flex-1">
-                            <label className="block text-sm text-gray-400 mb-1">Room ID</label>
+                            <label className="block text-sm text-gray-400 mb-1">{t("Room ID")}</label>
                             <input 
                                 value={roomId}
                                 onChange={e => setRoomId(e.target.value.toUpperCase())}
                                 className="w-full bg-gray-700 p-3 rounded text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono"
-                                placeholder="Enter Room ID"
+                                placeholder={t("Enter Room ID")}
+                                aria-label={t("Room ID")}
                             />
                          </div>
                          <button 
                             onClick={() => handleJoinRoom()}
                             className="bg-blue-600 px-6 py-3 rounded font-bold hover:bg-blue-700"
-                         >
-                            Join
-                         </button>
+                         >{t("Join")}</button>
                     </div>
 
                     <div className="relative flex py-2 items-center">
                         <div className="flex-grow border-t border-gray-600"></div>
-                        <span className="flex-shrink-0 mx-4 text-gray-500">OR</span>
+                        <span className="flex-shrink-0 mx-4 text-gray-500">{t("OR")}</span>
                         <div className="flex-grow border-t border-gray-600"></div>
                     </div>
 
                     <button 
                         onClick={handleCreateRoom}
                         className="w-full bg-green-700 p-3 rounded font-bold hover:bg-green-600"
-                    >
-                        Create New Room
-                    </button>
+                    >{t("Create New Room")}</button>
                     
                     <button 
                         onClick={handleBack}
                         className="w-full text-gray-400 hover:text-white mt-4"
-                    >
-                        Back to Home
-                    </button>
+                    >{t("Back to Home")}</button>
                 </div>
             </div>
         </div>
@@ -174,14 +170,12 @@ export const MultiplayerPage: React.FC = () => {
        <button 
         onClick={handleBack}
         className="absolute top-4 left-4 z-50 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
-      >
-        Exit
-      </button>
+      >{t("Exit")}</button>
 
       <div className="absolute top-4 right-4 z-50 text-white bg-gray-800 px-4 py-2 rounded flex gap-4">
-          <span>Room: <span className="font-mono text-yellow-400 font-bold">{roomId}</span></span>
+          <span>{t("Room:")}<span className="font-mono text-yellow-400 font-bold">{roomId}</span></span>
           {stage === 'waiting' && players.length >= 2 && (
-              <button onClick={startGame} className="bg-green-600 px-2 rounded hover:bg-green-500">Start Game</button>
+              <button onClick={startGame} className="bg-green-600 px-2 rounded hover:bg-green-500">{t("Start Game")}</button>
           )}
       </div>
 
@@ -190,7 +184,7 @@ export const MultiplayerPage: React.FC = () => {
       {stage === 'waiting' && (
           <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40">
               <div className="text-white text-2xl font-bold animate-pulse">
-                  Waiting for players to start... ({players.length} joined)
+                  {t("Waiting for players to start... ({count} joined)", { count: players.length })}
               </div>
           </div>
       )}
